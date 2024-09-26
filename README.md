@@ -20,8 +20,18 @@ To reproduce our results, follow these instructions:
 
 ### Prerequisites
 
-- Install ROS2 Rolling.
-- Clone [Lidarslam package](https://github.com/rsasaki0109/lidarslam_ros2) to your workspace.
+- Install ROS2 Jazzy.
+- Clone [lidarslam](https://github.com/rsasaki0109/lidarslam_ros2) package to your workspace.
+    ```sh
+    cd workspace_folder/src/
+    git clone --recursive https://github.com/rsasaki0109/lidarslam_ros2
+    cd ..
+    rosdep install --from-paths src --ignore-src -r -y
+    ```
+- Install grid_map pkg
+    ```sh
+    sudo apt install ros-jazzy-grid-map-ros
+    ```
 
 ### Launch Demo
 

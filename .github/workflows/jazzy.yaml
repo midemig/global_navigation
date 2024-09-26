@@ -1,12 +1,12 @@
-name: rolling
+name: jazzy
 
 on:
   pull_request:
     branches:
-      - rolling
+      - jazzy
   push:
     branches:
-      - rolling
+      - jazzy
       
 jobs:
   build-and-test:
@@ -21,14 +21,18 @@ jobs:
       - name: Setup ROS 2
         uses: ros-tooling/setup-ros@0.7.5
         with:
-          required-ros-distributions: rolling
+          required-ros-distributions: jazzy
       - name: install pcl
         run: sudo apt install libpcl-dev libpcl-*
+      - name: install grid_map
+        run: sudo apt install ros-jazzy-grid-map-ros
+      - name: install g2o
+        run: sudo apt install ros-jazzy-libg2o
       - name: build and test
         uses: ros-tooling/action-ros-ci@0.3.13
         with:
           package-name: local_navigation
-          target-ros2-distro: rolling
+          target-ros2-distro: jazzy
           vcs-repo-file-url: ${GITHUB_WORKSPACE}/dependencies.repos
       - name: Codecov
         uses: codecov/codecov-action@v1.2.1
