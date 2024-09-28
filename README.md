@@ -55,9 +55,8 @@ To reproduce our results, follow these instructions:
     ```sh
     sudo apt install python3.12-venv
     python3 -m venv global_nav_env
-    pip3 install -r src/global_navigation/requirements.txt
     source global_nav_env/bin/activate
-    export PYTHONPATH=$VIRTUAL_ENV/lib/python3.12/site-packages:$PYTHONPATH
+    pip3 install -r src/global_navigation/requirements.txt
     ```
 
 
@@ -72,7 +71,8 @@ To reproduce our results, follow these instructions:
     ```
 3. In another terminal, execute:
     ```sh
-    source workspace_folder/install/setup.bash
+    source global_nav_env/bin/activate
+    export PYTHONPATH=$VIRTUAL_ENV/lib/python3.12/site-packages:$PYTHONPATH
     ros2 launch local_navigation demo.launch.py
     ```
 
