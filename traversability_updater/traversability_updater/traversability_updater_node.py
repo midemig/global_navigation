@@ -1,7 +1,6 @@
 import rclpy
 from rclpy.node import Node
 from grid_map_msgs.msg import GridMap as GridMapMsg
-from geometry_msgs.msg import PoseStamped
 
 from ground_analyzer import GroundAnalyzer
 

@@ -5,14 +5,8 @@ from PIL import Image
 import torchvision.transforms as transforms
 from net import *
 import ctypes
-
-from skimage.filters import gabor_kernel
 from scipy import ndimage as ndi
 import cv2 as cv
-
-import matplotlib.pyplot as plt
-
-import numpy as np
 
 
 class GroundAnalyzer():
