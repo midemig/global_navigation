@@ -80,3 +80,8 @@ To reproduce our results, follow these instructions:
     export PYTHONPATH=$VIRTUAL_ENV/lib/python3.12/site-packages:$PYTHONPATH
     ros2 launch local_navigation demo.launch.py
     ```
+
+
+## Authors
+
+- Francisco Martín Rico

@@ -15,40 +15,40 @@
 import os
 
 from ament_index_python.packages import get_package_share_directory
-from launch_ros.actions import Node
-
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
+from launch_ros.actions import Node
+
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def generate_launch_description():
-    pkg_dir = get_package_share_directory("local_navigation")
-    param_file = os.path.join(pkg_dir, "config", "params_demo.yaml")
+    pkg_dir = get_package_share_directory('local_navigation')
+    param_file = os.path.join(pkg_dir, 'config', 'params_demo.yaml')
 
     lidarslam_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
-                get_package_share_directory("local_navigation"),
-                "launch",
-                "lidarslam_summit.launch.py",
+                get_package_share_directory('local_navigation'),
+                'launch',
+                'lidarslam_summit.launch.py',
             )
         )
     )
 
     local_navigation_cmd = Node(
-        package="local_navigation",
-        executable="local_navigation_program",
-        output="screen",
+        package='local_navigation',
+        executable='local_navigation_program',
+        output='screen',
         parameters=[param_file],
         arguments=[],
         remappings=[],
     )
 
     traversability_updater_cmd = Node(
-        package="traversability_updater",
-        executable="traversability_updater_node",
-        output="screen",
+        package='traversability_updater',
+        executable='traversability_updater_node',
+        output='screen',
     )
 
     ld = LaunchDescription()
