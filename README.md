@@ -1,3 +1,4 @@
+[![jazzy](https://github.com/midemig/global_navigation/actions/workflows/jazzy.yaml/badge.svg)](https://github.com/midemig/global_navigation/actions/workflows/jazzy.yaml)
 
 # Global Navigation
 
@@ -44,10 +45,10 @@ To reproduce our results, follow these instructions:
 
     ```sh
     sudo apt install libg2o-dev
-    cd ..
     rosdep update
+    vcs import --recursive . < global_navigation/dependencies.repos
+    cd ..
     rosdep install --from-paths src --ignore-src -r -y
-    vcs import --recursive . < dependencies.repos
     source /opt/ros/jazzy/setup.bash
     colcon build --symlink-install 
     ```
@@ -67,15 +68,12 @@ To reproduce our results, follow these instructions:
 2. In a terminal, play the downloaded bag:
 
     ```sh
-    source /opt/ros/jazzy/setup.bash
-    cd bagfile_folder/
-    ros2 bag play *.db3 --clock -p
+    ros2 bag play cesped_00/ --clock -p
     ```
 
 3. In another terminal, execute:
 
     ```sh
-    source install/setup.bash
     source global_nav_env/bin/activate
     export PYTHONPATH=$VIRTUAL_ENV/lib/python3.12/site-packages:$PYTHONPATH
     ros2 launch local_navigation demo.launch.py
@@ -83,8 +81,8 @@ To reproduce our results, follow these instructions:
 
 ## Authors
 
-- Francisco Martín Rico
-- Miguel Ángel de Miguel
-- Juan Sebastián Cely
-- Juan Carlos Manzanares
-- Alberto García
+- [Francisco Martín Rico](github.com/fmrico)
+- [Miguel Ángel de Miguel](github.com/midemig)
+- [Juan Sebastián Cely](github.com/juanscelyg)
+- [Juan Carlos Manzanares](github.com/Juancams)
+- [Alberto García](github.com/aaggj)
