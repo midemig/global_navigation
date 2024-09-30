@@ -1,3 +1,10 @@
+"""
+This module contains the launch description for the local navigation package.
+
+It includes the necessary nodes and configurations to run
+the local navigation demo.
+"""
+
 # Copyright 2024 Intelligent Robotics Lab
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +22,23 @@
 import os
 
 from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
-from launch_ros.actions import Node
 
+from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
+from launch_ros.actions import Node
+
 
 def generate_launch_description():
+    """
+    Generate the launch description for the local navigation package.
+
+    This function retrieves the package share directory and constructs the
+    path to the parameter configuration file for the local navigation demo.
+
+    :return: The launch description.
+    """
     pkg_dir = get_package_share_directory('local_navigation')
     param_file = os.path.join(pkg_dir, 'config', 'params.yaml')
 

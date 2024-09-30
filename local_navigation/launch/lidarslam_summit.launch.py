@@ -1,3 +1,10 @@
+"""
+This module contains the launch description for the local navigation package.
+
+It includes the necessary nodes and configurations to run
+the local navigation demo.
+"""
+
 # Copyright 2024 Intelligent Robotics Lab
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +19,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import os
 
 from ament_index_python.packages import get_package_share_directory
-import launch_ros.actions
 
 import launch
 
+import launch_ros.actions
+
 
 def generate_launch_description():
+    """
+    Generate the launch description for the local navigation package.
 
+    This function retrieves the package share directory and constructs the
+    path to the parameter configuration file for the local navigation demo.
+
+    :return: The launch description.
+    """
     main_param_dir = launch.substitutions.LaunchConfiguration(
         'main_param_dir',
         default=os.path.join(
@@ -34,7 +50,8 @@ def generate_launch_description():
     rviz_param_dir = launch.substitutions.LaunchConfiguration(
         'rviz_param_dir',
         default=os.path.join(
-            get_package_share_directory('local_navigation'), 'config', 'local_nav.rviz'
+            get_package_share_directory('local_navigation'), 'config',
+            'local_nav.rviz'
         ),
     )
 

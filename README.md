@@ -81,8 +81,10 @@ To reproduce our results, follow these instructions:
     ros2 launch local_navigation demo.launch.py
     ```
 
-
 ## Authors
 
 - Francisco Martín Rico
 - Miguel Ángel de Miguel
+- Juan Sebastián Cely
+- Juan Carlos Manzanares
+- Alberto García
