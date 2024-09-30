@@ -15,32 +15,37 @@
 import os
 
 from ament_index_python.packages import get_package_share_directory
+from launch_ros.actions import Node
 
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
-from launch_ros.actions import Node
-
 
 def generate_launch_description():
-    pkg_dir = get_package_share_directory('local_navigation')
-    param_file = os.path.join(pkg_dir, 'config', 'params.yaml')
+    pkg_dir = get_package_share_directory("local_navigation")
+    param_file = os.path.join(pkg_dir, "config", "params.yaml")
 
     lidarslam_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(
-            get_package_share_directory('lidarslam'),
-            'launch',
-            'lidarslam.launch.py')))
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory("lidarslam"),
+                "launch",
+                "lidarslam.launch.py",
+            )
+        )
+    )
 
-    local_navigation_cmd = Node(package='local_navigation',
-                                executable='local_navigation_program',
-                                output='screen',
-                                parameters=[param_file],
-                                # prefix=['xterm -e gdb -ex run  --args'],
-                                # prefix=['perf record --call-graph dwarf -o perf.data'],
-                                arguments=[],
-                                remappings=[])
+    local_navigation_cmd = Node(
+        package="local_navigation",
+        executable="local_navigation_program",
+        output="screen",
+        parameters=[param_file],
+        # prefix=['xterm -e gdb -ex run  --args'],
+        # prefix=['perf record --call-graph dwarf -o perf.data'],
+        arguments=[],
+        remappings=[],
+    )
 
     ld = LaunchDescription()
     ld.add_action(local_navigation_cmd)

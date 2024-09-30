@@ -21,37 +21,39 @@ To reproduce our results, follow these instructions:
 ### Installation
 
 - Requirements
-    - Ubuntu 24.04
-    - Ros2 Jazzy
-    - Python 3.12.3
-- Or use [distrobox](https://github.com/89luca89/distrobox)
+  - Ubuntu 24.04
+  - Ros2 Jazzy
+  - Python 3.12.3
+
+<!-- - Or use [distrobox](https://github.com/89luca89/distrobox)
+
     ```sh
     distrobox create --image ghcr.io/sloretz/ros:jazzy-desktop --name jazzy-desktop --home /path_to_container_home
     distrobox enter jazzy-desktop
-    ```
+    ``` -->
 
-- Install grid_map pkg
+- Create a workspace and clone the repository
+
     ```sh
-    sudo apt install ros-jazzy-grid-map-ros
-    ```
-- Clone [lidarslam](https://github.com/rsasaki0109/lidarslam_ros2) package to your workspace.
-    ```sh
-    cd workspace_folder/src/
-    git clone --recursive https://github.com/rsasaki0109/lidarslam_ros2
-    ```
-- Clone the repository
-    ```sh
+    mkdir -p global_navigation_ws/src
+    cd global_navigation_ws/src
     git clone https://github.com/midemig/global_navigation -b jazzy
     ```
+
 - Install dependences and build workspace
+
     ```sh
+    sudo apt install libg2o-dev
     cd ..
     rosdep update
     rosdep install --from-paths src --ignore-src -r -y
+    vcs import --recursive . < dependencies.repos
     source /opt/ros/jazzy/setup.bash
     colcon build --symlink-install 
     ```
+
 - Install python dependences
+
     ```sh
     sudo apt install python3.12-venv
     python3 -m venv global_nav_env
@@ -59,23 +61,22 @@ To reproduce our results, follow these instructions:
     pip3 install -r src/global_navigation/requirements.txt
     ```
 
-
 ### Launch Demo
 
 1. Download and unzip the [demo bagfile](https://urjc-my.sharepoint.com/:u:/g/personal/juancarlos_serrano_urjc_es/EQI9T9RNYuFJg6reV-pq-7IBjMEeEo7RxaJCudMs9IyRTg?e=hSNyQB).
 2. In a terminal, play the downloaded bag:
+
     ```sh
     source /opt/ros/jazzy/setup.bash
     cd bagfile_folder/
     ros2 bag play *.db3 --clock -p
     ```
+
 3. In another terminal, execute:
+
     ```sh
+    source install/setup.bash
     source global_nav_env/bin/activate
     export PYTHONPATH=$VIRTUAL_ENV/lib/python3.12/site-packages:$PYTHONPATH
     ros2 launch local_navigation demo.launch.py
     ```
-
-
-
-
