@@ -85,3 +85,4 @@ To reproduce our results, follow these instructions:
 ## Authors
 
 - Francisco Martín Rico
+- Miguel Ángel de Miguel
