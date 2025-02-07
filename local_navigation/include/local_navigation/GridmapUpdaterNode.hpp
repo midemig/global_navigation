@@ -114,6 +114,8 @@ private:
   float color_unknown_;
   float color_free_;
   float color_obstacle_;
+
+  bool bgr_mode_ {false};
 };
 
 }  // namespace local_navigation

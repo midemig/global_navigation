@@ -150,7 +150,7 @@ GridmapUpdaterNode::reset_gridmap()
 std::tuple<float, int, int>
 get_point_color(
   const pcl::PointXYZ & point, const image_geometry::PinholeCameraModel & camera_model,
-  const cv::Mat & image_rgb_raw)
+  const cv::Mat & image_rgb_raw, bool bgr_mode = false)
 {
   cv::Mat world_point_fromCamera = (cv::Mat_<double>(3, 1) << point.x, point.y, point.z);
   cv::Point2d point_2d = camera_model.project3dToPixel(cv::Point3d(point.x, point.y, point.z));
@@ -162,7 +162,12 @@ get_point_color(
     if (image_rgb_raw.type() == CV_8UC3) {
       cv::Vec3b color = image_rgb_raw.at<cv::Vec3b>(static_cast<int>(point_y),
         static_cast<int>(point_x));
-      Eigen::Vector3i color_eigen(color[0], color[1], color[2]);
+      Eigen::Vector3i color_eigen;
+      if (bgr_mode) {
+        color_eigen = Eigen::Vector3i(color[2], color[1], color[0]);
+      } else {
+        color_eigen = Eigen::Vector3i(color[0], color[1], color[2]);
+      }
       float color_value;
       grid_map::colorVectorToValue(color_eigen, color_value);
       return {color_value, point_x, point_y};
@@ -246,7 +251,7 @@ GridmapUpdaterNode::update_gridmap(
     if (camera_model_ != nullptr && !image_rgb_raw_.empty() &&
       point_camera.z > 0)  // Prevent to proyect points behind the camera
     {
-      auto [color, p_x, p_y] = get_point_color(point_camera, *camera_model_, image_rgb_raw_);
+      auto [color, p_x, p_y] = get_point_color(point_camera, *camera_model_, image_rgb_raw_, bgr_mode_);
       if (color > 0) {
         cm_(idx(0), idx(1)) = color;
         gridmap_->at("RGB", idx) = color;
@@ -412,6 +417,9 @@ GridmapUpdaterNode::image_callback(sensor_msgs::msg::Image::UniquePtr msg)
       image_rgb_ptr = cv_bridge::toCvCopy(*msg, sensor_msgs::image_encodings::RGB8);
     } else if (msg->encoding == sensor_msgs::image_encodings::MONO8) {
       image_rgb_ptr = cv_bridge::toCvCopy(*msg, sensor_msgs::image_encodings::MONO8);
+    } else if (msg->encoding == sensor_msgs::image_encodings::BGR8) {
+      image_rgb_ptr = cv_bridge::toCvCopy(*msg, sensor_msgs::image_encodings::BGR8);
+      bgr_mode_ = true;
     } else if (msg->encoding == sensor_msgs::image_encodings::BGRA8) {
       image_rgb_ptr = cv_bridge::toCvCopy(*msg, sensor_msgs::image_encodings::BGRA8);
     } else {
