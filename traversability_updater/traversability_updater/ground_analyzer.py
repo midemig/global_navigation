@@ -31,10 +31,13 @@ import numpy as np
 
 from scipy import ndimage as ndi
 
+from sklearn.cluster import Birch
+
 import torch
 import torch.utils.data
 
 import torchvision.transforms as transforms
+
 
 
 class GroundAnalyzer():
@@ -107,17 +110,23 @@ class GroundAnalyzer():
         self.size_x_ = 500
         self.size_y_ = 500
 
-        if self.img_model == 'HC':
-            self.features_ = np.empty((0, 15))
+        self.birch_model = Birch(n_clusters=None, threshold=self.img_min_dist_, branching_factor=50)
+        self.elev_birch_model = Birch(n_clusters=None, threshold=self.elev_min_dist_, branching_factor=50)
+
+        # if self.img_model == 'HC':
+        #     self.features_ = np.empty((0, 15))
 
         if img_mode == 'VAE':
             pkg_dir = get_package_share_directory('traversability_updater')
-            self.features_ = np.empty((0, self.zsize))
+            # self.features_ = np.empty((0, self.zsize))
             self.transform = transforms.Compose([transforms.Resize(
                 [self.submap_size_, self.submap_size_]), transforms.ToTensor()])
             self.vae = VAE(zsize=self.zsize, layer_count=2, channels=4)
+            # TODO: REVERT!!
+            # self.vae.load_state_dict(torch.load(
+            #     pkg_dir + '/traversability_updater/VAEmodel_h_16_128.pkl'))
             self.vae.load_state_dict(torch.load(
-                pkg_dir + '/traversability_updater/VAEmodel_h_16_128.pkl'))
+                '/home/migueldm/global_nav_ws/src/global_navigation/traversability_updater/traversability_updater/VAEmodel_h_16_128.pkl'))
             self.vae.cuda()
             self.vae.eval()
             print('VAE loaded')
@@ -163,6 +172,9 @@ class GroundAnalyzer():
         nav_map = np.zeros(
             (msg.data[layer_index].layout.dim[0].size,
              msg.data[layer_index].layout.dim[1].size)).astype(np.float32)
+        
+        if not hasattr(self.birch_model, 'subcluster_centers_'):
+            return nav_map
 
         for i in np.arange(0, img_map.shape[0] - self.submap_size_,
                            self.recompute_step_):
@@ -188,7 +200,7 @@ class GroundAnalyzer():
                         print('Feature is navigable')
                     # print('BBB', np.mean(submap), np.max(submap))
                     nav_map[i:i+self.submap_size_, j:j+self.submap_size_] += (
-                        (self.is_feature_img_nav(img_features, self.features_,
+                        (self.is_feature_img_nav(img_features, self.birch_model.subcluster_centers_,
                                                  threshold))
                         * ((self.recompute_step_ / self.submap_size_) ** 2)
                     )
@@ -204,9 +216,12 @@ class GroundAnalyzer():
 
         nav_map_elev = np.zeros((msg.data[layer_index].layout.dim[0].size,
                                 msg.data[layer_index].layout.dim[1].size)).astype(np.float32)
+        
+        if not hasattr(self.elev_birch_model, 'subcluster_centers_'):
+            return nav_map_elev
 
-        for i in np.arange(0, elev_map.shape[0] - self.submap_size_, self.recompute_step_*2):
-            for j in np.arange(0, elev_map.shape[1] - self.submap_size_, self.recompute_step_*2):
+        for i in np.arange(0, elev_map.shape[0] - self.submap_size_, self.recompute_step_):
+            for j in np.arange(0, elev_map.shape[1] - self.submap_size_, self.recompute_step_):
                 submap = np.copy(
                     elev_map[i:i+int(self.submap_size_/2), j:j+int(self.submap_size_/2)])
                 if np.sum(np.isnan(submap)) < self.max_unkown_/2:
@@ -217,7 +232,7 @@ class GroundAnalyzer():
                         print('Submap stats: ', np.mean(submap_print), np.max(
                             submap_print), np.min(submap_print), submap_print.shape)
                     nav_map_elev[i:i+int(self.submap_size_/2), j:j+int(self.submap_size_/2)] += ((self.is_feature_elev_nav(
-                        elev_features, self.elev_features_, threshold)))*((self.recompute_step_*2/self.submap_size_)**2)
+                        elev_features, self.elev_birch_model.subcluster_centers_, threshold)))*((self.recompute_step_*2/self.submap_size_)**2)
 
         return nav_map_elev
 
@@ -247,6 +262,9 @@ class GroundAnalyzer():
 
         nav_map = np.zeros((msg.data[layer_index].layout.dim[0].size,
                            msg.data[layer_index].layout.dim[1].size)).astype(np.float32)
+        
+        if not hasattr(self.elev_birch_model, 'subcluster_centers_'):
+            return map_elev
 
         img_tensor = img_tensor = torch.zeros(
             0, 4, self.submap_size_, self.submap_size_)
@@ -256,6 +274,9 @@ class GroundAnalyzer():
                 submap = np.copy(
                     map[i:i+self.submap_size_, j:j+self.submap_size_])
                 if np.sum(submap == 0) < self.max_unkown_:
+
+                    print('SAVING!!!!!!')
+                    np.save(f'submap_{i}_{j}.npy', submap)
 
                     image = Image.fromarray(submap.astype('uint8'))
                     image = self.transform(image)
@@ -274,7 +295,7 @@ class GroundAnalyzer():
         ij = 0
         for i, j in ij_array:
             nav_map[i:i+self.submap_size_, j:j+self.submap_size_] += ((self.is_feature_img_nav(
-                feats_vae[ij, :], self.features_, threshold)))*((self.recompute_step_/self.submap_size_)**2)
+                feats_vae[ij, :], self.birch_model.subcluster_centers_, threshold)))*((self.recompute_step_/self.submap_size_)**2)
             ij += 1
         return nav_map
 
@@ -362,6 +383,8 @@ class GroundAnalyzer():
             img[:, :, 2]), np.min(img[:, :, 2]))
         print('Map stats 2: ', np.mean(img[:, :, 3]), np.max(
             img[:, :, 3]), np.min(img[:, :, 3]))
+        
+        np.save('img.npy', img)
 
         img_tensor = torch.zeros(0, 4, self.submap_size_, self.submap_size_)
         image = Image.fromarray(img.astype('uint8'))
@@ -398,36 +421,15 @@ class GroundAnalyzer():
         if np.sum(np.isnan(feature)) > 0:
             print('Feature is nan')
             return
-        if self.elev_features_.shape[0] == 0:
-            print('First feature added')
-            self.elev_features_ = np.append(self.elev_features_, feature)
-            return
-        print('shapes: ', self.elev_features_.shape, feature.shape)
-        for feat in self.elev_features_:
-            if np.linalg.norm(feat - feature) < self.elev_min_dist_:
-                return
-            else:
-                print(self.elev_features_.shape, feature.shape)
-                self.elev_features_ = np.append(
-                    self.elev_features_, np.expand_dims(feature, axis=0), axis=0)
-                # print('Elev Feature added', self.elev_features_)
-                return
+        feature = np.expand_dims(feature, axis=0)
+        print('Shape ELEV:', feature.shape)
+        self.elev_birch_model.partial_fit(feature)
 
     def add_feature_img(self, feature):
         if np.isnan(feature).any():
             return
-        if self.features_.shape[0] == 0:
-            print('First feature added', self.features_.shape, feature.shape)
-            self.features_ = np.append(self.features_, feature, axis=0)
-            return
-        for feat in self.features_:
-            if np.linalg.norm(feat - feature) < self.img_min_dist_:
-                return
-            else:
-                self.features_ = np.append(self.features_, feature, axis=0)
-                # print('Feature added', self.features_)
-                np.save(self.features_filename_, self.features_)
-                return
+        print('Shape IMG:', feature.shape)
+        self.birch_model.partial_fit(feature)
 
     def is_feature_img_nav(self, feature, features, threshold):
         min_dist = np.inf
@@ -447,10 +449,11 @@ class GroundAnalyzer():
                 min_dist = dist
         if min_dist == np.inf:
             min_dist = 999
-        if min_dist < threshold:
-            return 255
-        else:
-            return 0
+        return 255 - np.clip(min_dist * (255/threshold), 0, 255)
+        # if min_dist < threshold:
+        #     return 255
+        # else:
+        #     return 0
 
     def map_layer_to_numpy(self, msg, layer_name):
         layer_index = msg.layers.index(layer_name)

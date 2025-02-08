@@ -173,9 +173,9 @@ class GridMapSubscriber(Node):
             map_img = self.analyzer_.recompute_transversality_img(
                 msg, threshold=1.5)
             map_elev = self.analyzer_.recompute_transversality_elev(
-                msg, threshold=0.1)
+                msg, threshold=1.5)
             computed_map = self.combine_transversality(map_img, map_elev,
-                                                       alpha=0.8)
+                                                       alpha=1.0) ###  0.8 previously
             self.set_layer_data(msg, 'transversality',
                                 np.array(computed_map).flatten().tolist())
             self.pub.publish(msg)
