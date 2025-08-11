@@ -62,8 +62,8 @@ GridmapUpdaterNode::GridmapUpdaterNode(const rclcpp::NodeOptions & options)
   subscription_img_ = create_subscription<sensor_msgs::msg::Image>(
       camera_topic_, 1,
       std::bind(&GridmapUpdaterNode::image_callback, this, _1));
-  gridmap_pub_ = create_publisher<grid_map_msgs::msg::GridMap>("grid_map", 10);
-  subgridmap_pub_ = create_publisher<grid_map_msgs::msg::GridMap>("subgrid_map", 10);
+  gridmap_pub_ = create_publisher<grid_map_msgs::msg::GridMap>(gridmap_topic_, 10);
+  subgridmap_pub_ = create_publisher<grid_map_msgs::msg::GridMap>(subgridmap_topic_, 10);
   img_pub_ = create_publisher<sensor_msgs::msg::Image>("img_proy_debug", 10);
 }
 
@@ -75,6 +75,8 @@ GridmapUpdaterNode::get_params()
   this->declare_parameter("lidar_topic", "/lidar_points");
   this->declare_parameter("path_topic", "/path");
   this->declare_parameter("pose_topic", "/current_pose");
+  this->declare_parameter("gridmap_topic", "/grid_map");
+  this->declare_parameter("subgridmap_topic", "/subgrid_map");
   this->declare_parameter("map_frame", "map");
   this->declare_parameter("robot_frame", "base_link");
   this->declare_parameter("camera_frame", "camera_color_optical_frame");
@@ -84,6 +86,8 @@ GridmapUpdaterNode::get_params()
   lidar_topic_ = this->get_parameter("lidar_topic").as_string();
   path_topic_ = this->get_parameter("path_topic").as_string();
   pose_topic_ = this->get_parameter("pose_topic").as_string();
+  gridmap_topic_ = this->get_parameter("gridmap_topic").as_string();
+  subgridmap_topic_ = this->get_parameter("subgridmap_topic").as_string();
   map_frame_id_ = this->get_parameter("map_frame").as_string();
   robot_frame_id_ = this->get_parameter("robot_frame").as_string();
   camera_frame_id_ = this->get_parameter("camera_frame").as_string();
@@ -132,7 +136,7 @@ GridmapUpdaterNode::reset_gridmap()
       for (auto j = 0; j < gridmap_->getSize()(1); j++) {
         em_(i, j) = NAN;
         tm_(i, j) = color_unknown_;
-        cm_(i, j) = 0;
+        cm_(i, j) = color_free_;
       }
   }
 
@@ -222,6 +226,8 @@ GridmapUpdaterNode::update_gridmap(
     if (std::isinf(point_camera.y)) {continue;}
     if (std::isinf(point_camera.z)) {continue;}
 
+    if (point_robot.x > 0 && only_positive_x_) {continue;}
+
     if (point_robot.x < robot_radious_max_x_ && point_robot.x > robot_radious_min_x_ &&
       abs(point_robot.y) < robot_radious_y_)
     {
@@ -302,51 +308,58 @@ transform_cloud(
 void
 GridmapUpdaterNode::pose_callback(geometry_msgs::msg::PoseStamped::UniquePtr pose)
 {
+  RCLCPP_INFO(get_logger(), "Pose received!");
+  
   grid_map::GridMap submap;
-
+  
+  RCLCPP_INFO(get_logger(), "submap");
+  
   grid_map::Position position(pose->pose.position.x + subgridmap_size_ / 2 * resolution_gridmap_,
     pose->pose.position.y + subgridmap_size_ * resolution_gridmap_ / 2);
-  grid_map::Index submapStartIndex;
-  gridmap_->getIndex(position, submapStartIndex);
-  grid_map::Index submapBufferSize(subgridmap_size_, subgridmap_size_);
-
-  submap.setFrameId(robot_frame_id_);
-  submap.setGeometry(grid_map::Length(subgridmap_size_ * resolution_gridmap_,
-    subgridmap_size_ * resolution_gridmap_), resolution_gridmap_);
-  submap.add("elevation");
-  submap.add("RGB");
-
-  grid_map::Matrix & data_rgb = submap["RGB"];
-  grid_map::Matrix & data_elevation = submap["elevation"];
-
-
+    grid_map::Index submapStartIndex;
+    gridmap_->getIndex(position, submapStartIndex);
+    grid_map::Index submapBufferSize(subgridmap_size_, subgridmap_size_);
+    
+    submap.setFrameId(robot_frame_id_);
+    submap.setGeometry(grid_map::Length(subgridmap_size_ * resolution_gridmap_,
+      subgridmap_size_ * resolution_gridmap_), resolution_gridmap_);
+      submap.add("elevation");
+      submap.add("RGB");
+      
+      grid_map::Matrix & data_rgb = submap["RGB"];
+      grid_map::Matrix & data_elevation = submap["elevation"];
+      
+  RCLCPP_INFO(get_logger(), "before loop");
+  
   grid_map::GridMapIterator iterator(submap);
   for (grid_map::SubmapIterator submap_iterator(*gridmap_, submapStartIndex, submapBufferSize);
-    !submap_iterator.isPastEnd() && !iterator.isPastEnd(); ++submap_iterator, ++iterator)
+  !submap_iterator.isPastEnd() && !iterator.isPastEnd(); ++submap_iterator, ++iterator)
   {
     grid_map::Position currentPositionInSubmap;
     gridmap_->getPosition(*submap_iterator, currentPositionInSubmap);
-
+    
     grid_map::Index idx;
     gridmap_->getIndex(currentPositionInSubmap, idx);
     const int i = iterator.getLinearIndex();
     data_rgb(i) = gridmap_->at("RGB", idx);
     data_elevation(i) = gridmap_->at("elevation", idx);
   }
-
+  
+  RCLCPP_INFO(get_logger(), "after loop");
   std::unique_ptr<grid_map_msgs::msg::GridMap> msg;
   msg = grid_map::GridMapRosConverter::toMessage(submap);
   msg->header.frame_id = robot_frame_id_;
   msg->header.stamp = pose->header.stamp;
-
+  
   subgridmap_pub_->publish(std::move(msg));
+  RCLCPP_INFO(get_logger(), "published");
 }
 
 
 void
 GridmapUpdaterNode::pc_callback(sensor_msgs::msg::PointCloud2::UniquePtr pc_in)
 {
-  pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>); /// CAMBIO PointXYZI
   pcl::fromROSMsg(*pc_in, *pcl_cloud);
 
   auto [cloud_map, error_map] = transform_cloud(
