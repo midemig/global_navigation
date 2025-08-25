@@ -257,7 +257,8 @@ GridmapUpdaterNode::update_gridmap(
     if (camera_model_ != nullptr && !image_rgb_raw_.empty() &&
       point_camera.z > 0)  // Prevent to proyect points behind the camera
     {
-      auto [color, p_x, p_y] = get_point_color(point_camera, *camera_model_, image_rgb_raw_, bgr_mode_);
+      auto [color, p_x, p_y] = get_point_color(point_camera, *camera_model_, image_rgb_raw_,
+          bgr_mode_);
       if (color > 0) {
         cm_(idx(0), idx(1)) = color;
         gridmap_->at("RGB", idx) = color;
@@ -309,48 +310,48 @@ void
 GridmapUpdaterNode::pose_callback(geometry_msgs::msg::PoseStamped::UniquePtr pose)
 {
   RCLCPP_INFO(get_logger(), "Pose received!");
-  
+
   grid_map::GridMap submap;
-  
+
   RCLCPP_INFO(get_logger(), "submap");
-  
+
   grid_map::Position position(pose->pose.position.x + subgridmap_size_ / 2 * resolution_gridmap_,
     pose->pose.position.y + subgridmap_size_ * resolution_gridmap_ / 2);
-    grid_map::Index submapStartIndex;
-    gridmap_->getIndex(position, submapStartIndex);
-    grid_map::Index submapBufferSize(subgridmap_size_, subgridmap_size_);
-    
-    submap.setFrameId(robot_frame_id_);
-    submap.setGeometry(grid_map::Length(subgridmap_size_ * resolution_gridmap_,
+  grid_map::Index submapStartIndex;
+  gridmap_->getIndex(position, submapStartIndex);
+  grid_map::Index submapBufferSize(subgridmap_size_, subgridmap_size_);
+
+  submap.setFrameId(robot_frame_id_);
+  submap.setGeometry(grid_map::Length(subgridmap_size_ * resolution_gridmap_,
       subgridmap_size_ * resolution_gridmap_), resolution_gridmap_);
-      submap.add("elevation");
-      submap.add("RGB");
-      
-      grid_map::Matrix & data_rgb = submap["RGB"];
-      grid_map::Matrix & data_elevation = submap["elevation"];
-      
+  submap.add("elevation");
+  submap.add("RGB");
+
+  grid_map::Matrix & data_rgb = submap["RGB"];
+  grid_map::Matrix & data_elevation = submap["elevation"];
+
   RCLCPP_INFO(get_logger(), "before loop");
-  
+
   grid_map::GridMapIterator iterator(submap);
   for (grid_map::SubmapIterator submap_iterator(*gridmap_, submapStartIndex, submapBufferSize);
-  !submap_iterator.isPastEnd() && !iterator.isPastEnd(); ++submap_iterator, ++iterator)
+    !submap_iterator.isPastEnd() && !iterator.isPastEnd(); ++submap_iterator, ++iterator)
   {
     grid_map::Position currentPositionInSubmap;
     gridmap_->getPosition(*submap_iterator, currentPositionInSubmap);
-    
+
     grid_map::Index idx;
     gridmap_->getIndex(currentPositionInSubmap, idx);
     const int i = iterator.getLinearIndex();
     data_rgb(i) = gridmap_->at("RGB", idx);
     data_elevation(i) = gridmap_->at("elevation", idx);
   }
-  
+
   RCLCPP_INFO(get_logger(), "after loop");
   std::unique_ptr<grid_map_msgs::msg::GridMap> msg;
   msg = grid_map::GridMapRosConverter::toMessage(submap);
   msg->header.frame_id = robot_frame_id_;
   msg->header.stamp = pose->header.stamp;
-  
+
   subgridmap_pub_->publish(std::move(msg));
   RCLCPP_INFO(get_logger(), "published");
 }
