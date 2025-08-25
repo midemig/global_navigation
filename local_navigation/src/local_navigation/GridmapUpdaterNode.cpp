@@ -360,7 +360,7 @@ GridmapUpdaterNode::pose_callback(geometry_msgs::msg::PoseStamped::UniquePtr pos
 void
 GridmapUpdaterNode::pc_callback(sensor_msgs::msg::PointCloud2::UniquePtr pc_in)
 {
-  pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>); /// CAMBIO PointXYZI
+  pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::fromROSMsg(*pc_in, *pcl_cloud);
 
   auto [cloud_map, error_map] = transform_cloud(
