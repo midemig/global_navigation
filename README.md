@@ -79,10 +79,29 @@ To reproduce our results, follow these instructions:
     ros2 launch local_navigation demo.launch.py
     ```
 
+## Citing This Work
+
+If you use this code in your research, please cite the corresponding paper:
+
+**BibTeX:**
+```bibtex
+@misc{dmiguel2025,
+  title={I Move Therefore I Learn: Experience-Based Traversability in Outdoor Robotics},
+  author={Miguel Ángel de Miguel, Jorge Beltrán, Juan S. Cely, Francisco Martín, Juan Carlos Manzanares, Alberto García},
+  year={2025},
+  eprint={2507.00882},
+  archivePrefix={arXiv},
+  primaryClass={cs.RO},
+  note={\url{https://doi.org/10.48550/arXiv.2507.00882}}
+}
+```
+    
+
 ## Authors
 
-- [Francisco Martín Rico](github.com/fmrico)
 - [Miguel Ángel de Miguel](github.com/midemig)
+- [Jorge Beltrán](github.com/beltransen)
 - [Juan Sebastián Cely](github.com/juanscelyg)
+- [Francisco Martín Rico](github.com/fmrico)
 - [Juan Carlos Manzanares](github.com/Juancams)
 - [Alberto García](github.com/aaggj)
