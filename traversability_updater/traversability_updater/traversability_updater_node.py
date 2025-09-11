@@ -32,7 +32,7 @@ import ctypes
 
 from grid_map_msgs.msg import GridMap as GridMapMsg
 
-from ground_analyzer import GroundAnalyzer
+from traversability_updater.ground_analyzer import GroundAnalyzer
 
 import numpy as np
 
@@ -98,10 +98,10 @@ class GridMapSubscriber(Node):
         # Set mode:
         # 'HC' for Hand Crafted Features
         # 'VAE' for VAE features
-        self.mode = 'HC'
-        # self.mode = 'VAE'
+        # self.mode = 'HC'
+        self.mode = 'VAE'
 
-        self.save_maps = True
+        self.save_maps = False
         self.data_folder = save_folder_name
         self.num = 0
 
@@ -166,6 +166,7 @@ class GridMapSubscriber(Node):
 
         img_map = map_rgb_layer_to_numpy(msg, 'RGB')
         map_elev = map_layer_to_numpy(msg, 'elevation')
+        map_elev = np.expand_dims(map_elev, axis=-1)  # Add a third dimension
 
         img_map = get_rgb_image(img_map)
 
@@ -204,15 +205,16 @@ class GridMapSubscriber(Node):
         layer_name = 'elevation'
         map_elev = map_layer_to_numpy(msg, layer_name)
 
-        self.get_logger().info('Recompute')
 
         if self.save_maps:
             np.save(self.data_folder + 'full_map.npy', map_rgb)
             np.save(self.data_folder + 'full_map_elev.npy', map_elev)
             return
 
+        self.get_logger().info('Recompute...')
         computed_map = self.analyzer_.recompute_transversality(
             map_rgb, map_elev, threshold=0.75, alpha=0.8)
+        self.get_logger().info('             ...Done!')
 
         self.set_layer_data(msg, 'transversality',
                             np.array(computed_map).flatten().tolist())
