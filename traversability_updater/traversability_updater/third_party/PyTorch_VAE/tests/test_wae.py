@@ -1,6 +1,6 @@
 import torch
 import unittest
-from models import WAE_MMD
+from traversability_updater.third_party.PyTorch_VAE.models import WAE_MMD
 from torchsummary import summary
 
 

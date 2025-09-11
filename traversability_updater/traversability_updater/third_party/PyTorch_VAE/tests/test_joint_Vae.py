@@ -1,6 +1,6 @@
 import torch
 import unittest
-from models import JointVAE
+from traversability_updater.third_party.PyTorch_VAE.models import JointVAE
 from torchsummary import summary
 
 

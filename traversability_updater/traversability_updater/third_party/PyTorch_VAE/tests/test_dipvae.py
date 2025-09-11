@@ -1,6 +1,6 @@
 import torch
 import unittest
-from models import DIPVAE
+from traversability_updater.third_party.PyTorch_VAE.models import DIPVAE
 from torchsummary import summary
 
 

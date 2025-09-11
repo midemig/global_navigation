@@ -1,6 +1,6 @@
 import torch
 import unittest
-from models import BetaVAE
+from traversability_updater.third_party.PyTorch_VAE.models import BetaVAE
 from torchsummary import summary
 
 

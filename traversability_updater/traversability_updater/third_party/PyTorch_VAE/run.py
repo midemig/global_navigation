@@ -3,7 +3,7 @@ import yaml
 import argparse
 
 from pathlib import Path
-from models import *
+from traversability_updater.third_party.PyTorch_VAE.models import *
 from experiment import VAEXperiment
 
 from pytorch_lightning import Trainer

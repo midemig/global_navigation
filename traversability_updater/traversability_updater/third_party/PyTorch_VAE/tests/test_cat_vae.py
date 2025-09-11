@@ -1,6 +1,6 @@
 import torch
 import unittest
-from models import GumbelVAE
+from traversability_updater.third_party.PyTorch_VAE.models import GumbelVAE
 from torchsummary import summary
 
 

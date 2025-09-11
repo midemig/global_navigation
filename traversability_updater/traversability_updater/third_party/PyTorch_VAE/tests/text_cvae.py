@@ -1,6 +1,6 @@
 import torch
 import unittest
-from models import CVAE
+from traversability_updater.third_party.PyTorch_VAE.models import CVAE
 
 
 class TestCVAE(unittest.TestCase):

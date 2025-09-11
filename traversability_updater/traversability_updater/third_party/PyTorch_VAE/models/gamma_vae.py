@@ -1,5 +1,5 @@
 import torch
-from models import BaseVAE
+from traversability_updater.third_party.PyTorch_VAE.models import BaseVAE
 from torch import nn
 from torch.distributions import Gamma
 from torch.nn import functional as F

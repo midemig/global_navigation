@@ -4,9 +4,9 @@ import os
 import math
 import torch
 from torch import optim
-from models import BaseVAE
-from models.types_ import *
-from utils import data_loader
+from traversability_updater.third_party.PyTorch_VAE.models import BaseVAE
+from traversability_updater.third_party.PyTorch_VAE.models.types_ import *
+from traversability_updater.third_party.PyTorch_VAE.utils import data_loader
 import pytorch_lightning as pl
 from torchvision import transforms
 import torchvision.utils as vutils

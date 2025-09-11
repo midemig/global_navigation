@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from models import BaseVAE
+from traversability_updater.third_party.PyTorch_VAE.models import BaseVAE
 from torch import nn
 from .types_ import *
 

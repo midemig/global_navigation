@@ -1,6 +1,6 @@
 import torch
 import unittest
-from models import HVAE
+from traversability_updater.third_party.PyTorch_VAE.models import HVAE
 from torchsummary import summary
 
 

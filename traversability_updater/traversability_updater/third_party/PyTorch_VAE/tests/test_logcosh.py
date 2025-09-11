@@ -1,6 +1,6 @@
 import torch
 import unittest
-from models import LogCoshVAE
+from traversability_updater.third_party.PyTorch_VAE.models import LogCoshVAE
 from torchsummary import summary
 
 

@@ -1,6 +1,6 @@
 import torch
 import unittest
-from models import MIWAE
+from traversability_updater.third_party.PyTorch_VAE.models import MIWAE
 from torchsummary import summary
 
 
