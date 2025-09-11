@@ -23,8 +23,8 @@
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 #include "tf2_ros/transform_broadcaster.h"
-#include "tf2/LinearMath/Transform.h"
-#include "tf2/transform_datatypes.h"
+#include "tf2/LinearMath/Transform.hpp"
+#include "tf2/transform_datatypes.hpp"
 #include "pcl/point_cloud.h"
 #include "pcl/point_types.h"
 
@@ -91,8 +91,8 @@ private:
   std::string subgridmap_topic_;
 
   double resolution_gridmap_ {0.2};
-  double size_x_ {400.0};
-  double size_y_ {400.0};
+  double size_x_ {100.0};
+  double size_y_ {100.0};
   double infl_radious_x_ {20.0};
   double infl_radious_y_ {20.0};
   double robot_radious_min_x_ {-4.0};

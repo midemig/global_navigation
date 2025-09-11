@@ -16,9 +16,9 @@
 
 #include "local_navigation/GridmapUpdaterNode.hpp"
 
-#include "tf2/LinearMath/Transform.h"
-#include "tf2/transform_datatypes.h"
-#include "tf2_ros/transform_listener.h"
+#include "tf2/LinearMath/Transform.hpp"
+#include "tf2/transform_datatypes.hpp"
+#include "tf2_ros/transform_listener.hpp"
 #include "pcl/filters/voxel_grid.h"
 #include "pcl/common/common.h"
 #include "pcl_conversions/pcl_conversions.h"
@@ -115,7 +115,7 @@ void
 GridmapUpdaterNode::init_colors()
 {
   Eigen::Vector3i color_unknown_v(200, 200, 200);
-  Eigen::Vector3i color_free_v(0, 255, 0);
+  Eigen::Vector3i color_free_v(0, 0, 0);
   Eigen::Vector3i color_obstacle_v(255, 0, 0);
 
   grid_map::colorVectorToValue(color_unknown_v, color_unknown_);
@@ -313,8 +313,6 @@ GridmapUpdaterNode::pose_callback(geometry_msgs::msg::PoseStamped::UniquePtr pos
 
   grid_map::GridMap submap;
 
-  RCLCPP_INFO(get_logger(), "submap");
-
   grid_map::Position position(pose->pose.position.x + subgridmap_size_ / 2 * resolution_gridmap_,
     pose->pose.position.y + subgridmap_size_ * resolution_gridmap_ / 2);
   grid_map::Index submapStartIndex;
@@ -330,8 +328,6 @@ GridmapUpdaterNode::pose_callback(geometry_msgs::msg::PoseStamped::UniquePtr pos
   grid_map::Matrix & data_rgb = submap["RGB"];
   grid_map::Matrix & data_elevation = submap["elevation"];
 
-  RCLCPP_INFO(get_logger(), "before loop");
-
   grid_map::GridMapIterator iterator(submap);
   for (grid_map::SubmapIterator submap_iterator(*gridmap_, submapStartIndex, submapBufferSize);
     !submap_iterator.isPastEnd() && !iterator.isPastEnd(); ++submap_iterator, ++iterator)
@@ -346,14 +342,12 @@ GridmapUpdaterNode::pose_callback(geometry_msgs::msg::PoseStamped::UniquePtr pos
     data_elevation(i) = gridmap_->at("elevation", idx);
   }
 
-  RCLCPP_INFO(get_logger(), "after loop");
   std::unique_ptr<grid_map_msgs::msg::GridMap> msg;
   msg = grid_map::GridMapRosConverter::toMessage(submap);
   msg->header.frame_id = robot_frame_id_;
   msg->header.stamp = pose->header.stamp;
 
   subgridmap_pub_->publish(std::move(msg));
-  RCLCPP_INFO(get_logger(), "published");
 }
 
 
