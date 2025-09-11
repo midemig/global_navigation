@@ -33,9 +33,11 @@ from sklearn.cluster import Birch
 
 import cv2 as cv
 
-from third_party.PyTorch_VAE.experiment import VAEXperiment
+from traversability_updater.third_party.PyTorch_VAE.experiment import VAEXperiment
 
-from third_party.PyTorch_VAE.models import *
+from traversability_updater.third_party.PyTorch_VAE.models import *
+
+from ament_index_python.packages import get_package_share_directory
 
 
 def hval_to_vector(hval):
@@ -267,12 +269,14 @@ class GroundAnalyzer():
                 transforms.GaussianBlur(3, sigma=(5.0, 5.0))
             ])
 
+            pkg_folder = get_package_share_directory('traversability_updater')
+
             if not self.rgbh:
                 # NO ROTATION MODEL LOAD
-                folder = '/home/migueldm/TEMP/PyTorch-VAE/logs/VanillaVAE/version_' + str(version) + '/'
+                folder = pkg_folder + '/checkpoints/VanillaVAE/version_' + str(version) + '/'
                 config = yaml.safe_load(open(folder + 'vae_rgb.yaml'))
                 model = vae_models[config['model_params']['name']](**config['model_params'])
-                ckpt = torch.load(folder + 'checkpoints/last.ckpt')
+                ckpt = torch.load(folder + 'last.ckpt')
                 print(ckpt['state_dict'].keys())
                 self.experiment = VAEXperiment(model, config['exp_params'])
                 self.experiment.load_state_dict(ckpt['state_dict'])
@@ -283,10 +287,10 @@ class GroundAnalyzer():
 
             else:
                 # ROTATION MODEL LOAD
-                folder = '/home/migueldm/TEMP/PyTorch-VAE/logs/VanillaVAERGBH/version_' + str(version) + '/'
+                folder = pkg_folder + '/checkpoints/VanillaVAERGBH/version_' + str(version) + '/'
                 config = yaml.safe_load(open(folder + 'vae_rgbh.yaml'))
                 model = vae_models[config['model_params']['name']](**config['model_params'])
-                ckpt = torch.load(folder + 'checkpoints/last.ckpt')
+                ckpt = torch.load(folder + 'last.ckpt')
                 missing_keys, unexpected_keys = model.load_state_dict(ckpt['state_dict'], strict=False)
                 self.experiment = VAEXperiment(model, config['exp_params'])
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -306,10 +310,10 @@ class GroundAnalyzer():
             ])
             self.weights = weights / weights.sum() * len(weights)
 
-            folder = '/home/migueldm/TEMP/PyTorch-VAE/logs/VanillaVAEH/version_' + str(1) + '/'
+            folder = pkg_folder + '/checkpoints/VanillaVAEH/version_' + str(0) + '/'
             config = yaml.safe_load(open(folder + 'vae_h.yaml'))
             model = vae_models[config['model_params']['name']](**config['model_params'])
-            ckpt = torch.load(folder + 'checkpoints/last.ckpt')
+            ckpt = torch.load(folder + 'last.ckpt')
             self.elev_experiment = VAEXperiment(model, config['exp_params'])
             self.elev_experiment.load_state_dict(ckpt['state_dict'])
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
