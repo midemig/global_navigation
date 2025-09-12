@@ -38,7 +38,7 @@ To reproduce our results, follow these instructions:
     ```sh
     mkdir -p global_navigation_ws/src
     cd global_navigation_ws/src
-    git clone https://github.com/IntelligentRoboticsLabs/global_navigation -b rolling
+    git clone https://github.com/midemig/global_navigation -b jazzy
     ```
 
 - Install dependences and build workspace
