@@ -2,5 +2,5 @@ repositories:
   ThirdParty/lidarslam_ros2:
     type: git
     url: https://github.com/fmrico/lidarslam_ros2
-    version: humble
+    version: summit-xl
     submodules: recursive
