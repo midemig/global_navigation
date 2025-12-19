@@ -64,7 +64,7 @@ To reproduce our results, follow these instructions:
 
 ### Launch Demo
 
-1. Download and unzip the [demo bagfile]([https://urjc-my.sharepoint.com/:u:/g/personal/juancarlos_serrano_urjc_es/EQI9T9RNYuFJg6reV-pq-7IBjMEeEo7RxaJCudMs9IyRTg?e=hSNyQB](https://urjc-my.sharepoint.com/:u:/g/personal/miguelangel_demiguel_urjc_es/IQCCUBCLxZOsQKuwxqeLw5i5ARZLa8Z3k4lTLb0z8eX362s?e=j1npwV)).
+1. Download and unzip the [demo bagfile](https://urjc-my.sharepoint.com/:u:/g/personal/miguelangel_demiguel_urjc_es/IQCCUBCLxZOsQKuwxqeLw5i5ARZLa8Z3k4lTLb0z8eX362s?e=j1npwV).
 2. In a terminal, play the downloaded bag:
 
     ```sh
